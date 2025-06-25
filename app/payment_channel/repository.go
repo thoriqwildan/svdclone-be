@@ -21,11 +21,11 @@ func GetFiltered(filter PaymentChannelFilter) ([]PaymentChannelResponse, int64, 
 			pc.fixed_fee,
 			pc.created_at,
 			pc.updated_at,
-			pm.code as payment_method
-		`).
-		Joins("LEFT JOIN payment_methods pm ON pm.id = pc.payment_method_id")
+			pm.code as payment_method__code,
+			pm.id as payment_method__id
+		`).Joins("LEFT JOIN payment_methods pm ON pm.id = pc.payment_method_id")
 
-	// Filter
+	// Apply filters if provided
 	if filter.Code != "" {
 		query = query.Where("pc.code ILIKE ?", "%"+filter.Code+"%")
 	}
@@ -33,12 +33,12 @@ func GetFiltered(filter PaymentChannelFilter) ([]PaymentChannelResponse, int64, 
 		query = query.Where("pc.name ILIKE ?", "%"+filter.Name+"%")
 	}
 
-	// Total count
+	// Get total count before applying pagination
 	if err := query.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
-	// Pagination
+	// Apply pagination
 	if filter.Page < 1 {
 		filter.Page = 1
 	}
@@ -47,7 +47,7 @@ func GetFiltered(filter PaymentChannelFilter) ([]PaymentChannelResponse, int64, 
 	}
 	offset := (filter.Page - 1) * filter.Limit
 
-	// Query data + Scan ke response
+	// Execute query and scan into paymentChannels slice
 	if err := query.
 		Limit(filter.Limit).
 		Offset(offset).
