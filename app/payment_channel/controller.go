@@ -25,6 +25,7 @@ func CreatePaymentChannel(c *fiber.Ctx) error {
 		})
 	}
 
+	// Check if payment method exists
 	if err := database.DB.Where("id = ?", req.PaymentMethodId).First(&models.PaymentMethod{}).Error; err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(global.ErrorResponse{
 			Success: false,
@@ -33,6 +34,7 @@ func CreatePaymentChannel(c *fiber.Ctx) error {
 		})
 	}
 
+	// Check for duplicate payment channel code or name
 	if err := database.DB.Where("code = ?", req.Code).Or("name = ?", req.Name).First(&paymentChannel).Error; err == nil {
 		return c.Status(fiber.StatusBadRequest).JSON(global.ErrorResponse{
 			Success: false,
@@ -41,6 +43,7 @@ func CreatePaymentChannel(c *fiber.Ctx) error {
 		})
 	}
 
+	// Populate payment channel model from request
 	paymentChannel.Name = req.Name
 	paymentChannel.PaymentMethodId = req.PaymentMethodId
 	paymentChannel.Code = req.Code
@@ -51,6 +54,7 @@ func CreatePaymentChannel(c *fiber.Ctx) error {
 	paymentChannel.FixedFee = req.FixedFee
 	paymentChannel.UserAction = req.UserAction
 
+	// Create payment channel in database
 	if err := database.DB.Create(&paymentChannel).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(global.ErrorResponse{
 			Success: false,
@@ -59,26 +63,30 @@ func CreatePaymentChannel(c *fiber.Ctx) error {
 		})
 	}
 
+	// Respond with success and the created payment channel data
 	return c.Status(fiber.StatusCreated).JSON(global.SuccessResponse{
 		Success: true,
 		Message: "Payment channel created successfully",
-		Data:    PaymentChannelResponse{
-			Id:	paymentChannel.ID,
-			Name: paymentChannel.Name,
-			PaymentMethod: PaymentMethod{
-				Id: paymentChannel.PaymentMethodId,
-				Name: paymentmethod.GetCodeById(int(paymentChannel.PaymentMethodId)),
+		Data: PaymentChannelResponse{
+			Id:          paymentChannel.ID,
+			Name:        paymentChannel.Name,
+			Code:        paymentChannel.Code,
+			IconUrl:     paymentChannel.IconUrl.String,
+			OrderNum:    int(paymentChannel.OrderNum.Int64),
+			LibName:     paymentChannel.LibName.String,
+			Mdr:         paymentChannel.MDR,
+			FixedFee:    paymentChannel.FixedFee,
+			CreatedAt:   paymentChannel.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+			UpdatedAt:   paymentChannel.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
+			PaymentMethod: &PaymentMethod{ // Instantiate as a pointer
+				Id:   paymentChannel.PaymentMethodId,
+				Code: paymentmethod.GetCodeById(int(paymentChannel.PaymentMethodId)), // Assuming GetCodeById returns the code
 			},
-			Code: paymentChannel.Code,
-			IconUrl: paymentChannel.IconUrl.String,
-			OrderNum: int(paymentChannel.OrderNum.Int64),
-			LibName: paymentChannel.LibName.String,
-			Mdr: paymentChannel.MDR,
-			FixedFee: paymentChannel.FixedFee,
 		},
 	})
 }
 
+// GetPaymentChannels retrieves a list of payment channels based on filters.
 func GetPaymentChannels(c *fiber.Ctx) error {
 	var filter PaymentChannelFilter
 	if err := c.QueryParser(&filter); err != nil {
@@ -99,13 +107,14 @@ func GetPaymentChannels(c *fiber.Ctx) error {
 		})
 	}
 
+	// Respond with paginated payment channel data
 	return c.JSON(global.SuccessResponse{
 		Success: true,
 		Message: "Payment methods retrieved successfully",
 		Data: global.PaginationData{
 			Items: data,
 			Meta: global.PaginationPage{
-				Page: filter.Page,
+				Page:  filter.Page,
 				Limit: filter.Limit,
 				Total: total,
 			},
@@ -113,6 +122,7 @@ func GetPaymentChannels(c *fiber.Ctx) error {
 	})
 }
 
+// GetPaymentChannelById retrieves a single payment channel by its ID.
 func GetPaymentChannelById(c *fiber.Ctx) error {
 	id := c.Params("id")
 	var paymentChannel models.PaymentChannel
@@ -123,28 +133,31 @@ func GetPaymentChannelById(c *fiber.Ctx) error {
 			Errors:  nil,
 		})
 	}
+
+	// Respond with the retrieved payment channel data
 	return c.Status(fiber.StatusOK).JSON(global.SuccessResponse{
 		Success: true,
 		Message: "Payment channel retrieved successfully",
 		Data: PaymentChannelResponse{
-			Id: paymentChannel.ID,
-			Name: paymentChannel.Name,
-			PaymentMethod: PaymentMethod{
-				Id: paymentChannel.PaymentMethodId,
-				Name: paymentmethod.GetCodeById(int(paymentChannel.PaymentMethodId)),
+			Id:          paymentChannel.ID,
+			Name:        paymentChannel.Name,
+			Code:        paymentChannel.Code,
+			IconUrl:     paymentChannel.IconUrl.String,
+			OrderNum:    int(paymentChannel.OrderNum.Int64),
+			LibName:     paymentChannel.LibName.String,
+			Mdr:         paymentChannel.MDR,
+			FixedFee:    paymentChannel.FixedFee,
+			CreatedAt:   paymentChannel.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+			UpdatedAt:   paymentChannel.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
+			PaymentMethod: &PaymentMethod{ // Instantiate as a pointer
+				Id:   paymentChannel.PaymentMethodId,
+				Code: paymentmethod.GetCodeById(int(paymentChannel.PaymentMethodId)), // Assuming GetCodeById returns the code
 			},
-			Code: paymentChannel.Code,
-			IconUrl: paymentChannel.IconUrl.String,
-			OrderNum: int(paymentChannel.OrderNum.Int64),
-			LibName: paymentChannel.LibName.String,
-			Mdr: paymentChannel.MDR,
-			FixedFee: paymentChannel.FixedFee,
-			CreatedAt: paymentChannel.CreatedAt.Format("2006-01-02 15:04:05"),
-			UpdatedAt: paymentChannel.UpdatedAt.Format("2006-01-02 15:04:05"),
 		},
 	})
 }
 
+// UpdatePaymentChannel handles updating an existing payment channel.
 func UpdatePaymentChannel(c *fiber.Ctx) error {
 	var req PaymentChannelRequest
 	id := c.Params("id")
@@ -168,6 +181,7 @@ func UpdatePaymentChannel(c *fiber.Ctx) error {
 		})
 	}
 
+	// Check if payment method exists
 	if err := database.DB.Where("id = ?", req.PaymentMethodId).First(&models.PaymentMethod{}).Error; err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(global.ErrorResponse{
 			Success: false,
@@ -176,14 +190,7 @@ func UpdatePaymentChannel(c *fiber.Ctx) error {
 		})
 	}
 
-	// if err := database.DB.Where("code = ?", req.Code).Or("name = ?", req.Name).First(&paymentChannel).Error; err == nil {
-	// 	return c.Status(fiber.StatusBadRequest).JSON(global.ErrorResponse{
-	// 		Success: false,
-	// 		Message: "Payment channel with the same code or name already exists",
-	// 		Errors:  nil,
-	// 	})
-	// }
-
+	// Update payment channel model fields
 	paymentChannel.Name = req.Name
 	paymentChannel.PaymentMethodId = req.PaymentMethodId
 	paymentChannel.Code = req.Code
@@ -193,6 +200,8 @@ func UpdatePaymentChannel(c *fiber.Ctx) error {
 	paymentChannel.MDR = strconv.Itoa(req.Mdr)
 	paymentChannel.FixedFee = req.FixedFee
 	paymentChannel.UserAction = req.UserAction
+
+	// Save updated payment channel to database
 	if err := database.DB.Save(&paymentChannel).Error; err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(global.ErrorResponse{
 			Success: false,
@@ -201,28 +210,30 @@ func UpdatePaymentChannel(c *fiber.Ctx) error {
 		})
 	}
 
+	// Respond with success and the updated payment channel data
 	return c.Status(fiber.StatusOK).JSON(global.SuccessResponse{
 		Success: true,
 		Message: "Payment channel updated successfully",
 		Data: PaymentChannelResponse{
-			Id: paymentChannel.ID,
-			Name: paymentChannel.Name,
-			PaymentMethod: PaymentMethod{
-				Id: paymentChannel.PaymentMethodId,
-				Name: paymentmethod.GetCodeById(int(paymentChannel.PaymentMethodId)),
+			Id:          paymentChannel.ID,
+			Name:        paymentChannel.Name,
+			Code:        paymentChannel.Code,
+			IconUrl:     paymentChannel.IconUrl.String,
+			OrderNum:    int(paymentChannel.OrderNum.Int64),
+			LibName:     paymentChannel.LibName.String,
+			Mdr:         paymentChannel.MDR,
+			FixedFee:    paymentChannel.FixedFee,
+			CreatedAt:   paymentChannel.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+			UpdatedAt:   paymentChannel.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
+			PaymentMethod: &PaymentMethod{ // Instantiate as a pointer
+				Id:   paymentChannel.PaymentMethodId,
+				Code: paymentmethod.GetCodeById(int(paymentChannel.PaymentMethodId)), // Assuming GetCodeById returns the code
 			},
-			Code: paymentChannel.Code,
-			IconUrl: paymentChannel.IconUrl.String,
-			OrderNum: int(paymentChannel.OrderNum.Int64),
-			LibName: paymentChannel.LibName.String,
-			Mdr: paymentChannel.MDR,
-			FixedFee: paymentChannel.FixedFee,
-			CreatedAt: paymentChannel.CreatedAt.Format("2006-01-02 15:04:05"),
-			UpdatedAt: paymentChannel.UpdatedAt.Format("2006-01-02 15:04:05"),
 		},
 	})
 }
 
+// DeletePaymentChannel handles the deletion of a payment channel by ID.
 func DeletePaymentChannel(c *fiber.Ctx) error {
 	id := c.Params("id")
 	var paymentChannel models.PaymentChannel
