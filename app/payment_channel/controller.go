@@ -65,7 +65,10 @@ func CreatePaymentChannel(c *fiber.Ctx) error {
 		Data:    PaymentChannelResponse{
 			Id:	paymentChannel.ID,
 			Name: paymentChannel.Name,
-			PaymentMethod: paymentmethod.GetCodeById(int(paymentChannel.PaymentMethodId)),
+			PaymentMethod: PaymentMethod{
+				Id: paymentChannel.PaymentMethodId,
+				Name: paymentmethod.GetCodeById(int(paymentChannel.PaymentMethodId)),
+			},
 			Code: paymentChannel.Code,
 			IconUrl: paymentChannel.IconUrl.String,
 			OrderNum: int(paymentChannel.OrderNum.Int64),
@@ -126,7 +129,10 @@ func GetPaymentChannelById(c *fiber.Ctx) error {
 		Data: PaymentChannelResponse{
 			Id: paymentChannel.ID,
 			Name: paymentChannel.Name,
-			PaymentMethod: paymentmethod.GetCodeById(int(paymentChannel.PaymentMethodId)),
+			PaymentMethod: PaymentMethod{
+				Id: paymentChannel.PaymentMethodId,
+				Name: paymentmethod.GetCodeById(int(paymentChannel.PaymentMethodId)),
+			},
 			Code: paymentChannel.Code,
 			IconUrl: paymentChannel.IconUrl.String,
 			OrderNum: int(paymentChannel.OrderNum.Int64),
@@ -201,7 +207,10 @@ func UpdatePaymentChannel(c *fiber.Ctx) error {
 		Data: PaymentChannelResponse{
 			Id: paymentChannel.ID,
 			Name: paymentChannel.Name,
-			PaymentMethod: paymentmethod.GetCodeById(int(paymentChannel.PaymentMethodId)),
+			PaymentMethod: PaymentMethod{
+				Id: paymentChannel.PaymentMethodId,
+				Name: paymentmethod.GetCodeById(int(paymentChannel.PaymentMethodId)),
+			},
 			Code: paymentChannel.Code,
 			IconUrl: paymentChannel.IconUrl.String,
 			OrderNum: int(paymentChannel.OrderNum.Int64),

@@ -15,7 +15,7 @@ type PaymentChannelRequest struct {
 type PaymentChannelResponse struct {
 	Id                uint    `json:"id"`
 	Name              string  `json:"name"`
-	PaymentMethod 	string  `json:"payment_method"`
+	PaymentMethod 		PaymentMethod  `json:"payment_method"`
 	Code              string  `json:"code,omitempty"`
 	IconUrl           string  `json:"icon_url,omitempty"`
 	OrderNum          int     `json:"order_num,omitempty"`
@@ -24,6 +24,11 @@ type PaymentChannelResponse struct {
 	FixedFee          float64 `json:"fixed_fee,omitempty"`
 	CreatedAt        string  `json:"created_at"`
 	UpdatedAt        string  `json:"updated_at"`
+}
+
+type PaymentMethod struct {
+	Id  uint   `json:"id"`
+	Name string `json:"name"`
 }
 
 type PaymentChannelFilter struct {
