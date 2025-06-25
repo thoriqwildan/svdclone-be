@@ -1,6 +1,8 @@
 package paymentchannel
 
 import (
+	"strconv"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/log"
 	paymentmethod "github.com/thoriqwildan/svdclone-be/app/payment_method"
@@ -45,7 +47,7 @@ func CreatePaymentChannel(c *fiber.Ctx) error {
 	paymentChannel.IconUrl = helper.ToNullString(req.IconUrl)
 	paymentChannel.OrderNum = helper.ToNullInt64(req.OrderNum)
 	paymentChannel.LibName = helper.ToNullString(req.LibName)
-	paymentChannel.MDR = req.Mdr
+	paymentChannel.MDR = strconv.Itoa(req.Mdr)
 	paymentChannel.FixedFee = req.FixedFee
 	paymentChannel.UserAction = req.UserAction
 
@@ -182,7 +184,7 @@ func UpdatePaymentChannel(c *fiber.Ctx) error {
 	paymentChannel.IconUrl = helper.ToNullString(req.IconUrl)
 	paymentChannel.OrderNum = helper.ToNullInt64(req.OrderNum)
 	paymentChannel.LibName = helper.ToNullString(req.LibName)
-	paymentChannel.MDR = req.Mdr
+	paymentChannel.MDR = strconv.Itoa(req.Mdr)
 	paymentChannel.FixedFee = req.FixedFee
 	paymentChannel.UserAction = req.UserAction
 	if err := database.DB.Save(&paymentChannel).Error; err != nil {

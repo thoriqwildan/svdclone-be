@@ -7,7 +7,7 @@ type PaymentChannelRequest struct {
 	IconUrl			string `json:"icon_url,omitempty"`
 	OrderNum		int    `json:"order_num,omitempty" validate:"omitempty,numeric"`
 	LibName			string `json:"lib_name,omitempty"`
-	Mdr 				string `json:"mdr,omitempty" validate:"omitempty"`
+	Mdr 				int `json:"mdr,omitempty" validate:"omitempty, numeric"`
 	FixedFee		float64 `json:"fixed_fee,omitempty" validate:"omitempty,numeric"`
 	UserAction	string `json:"user_action" validate:"required"`
 }
