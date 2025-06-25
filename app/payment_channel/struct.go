@@ -13,23 +13,22 @@ type PaymentChannelRequest struct {
 }
 
 type PaymentChannelResponse struct {
-	Id            uint      `json:"id"`
-	Name          string    `json:"name"`
-	Code          string    `json:"code,omitempty"`
-	IconUrl       string    `json:"icon_url,omitempty"`
-	OrderNum      int       `json:"order_num,omitempty"`
-	LibName       string    `json:"lib_name,omitempty"`
-	Mdr           string    `json:"mdr,omitempty"`
-	FixedFee      float64   `json:"fixed_fee,omitempty"`
-	CreatedAt     string 		`json:"created_at"`
-	UpdatedAt     string 		`json:"updated_at"`
-	// Make PaymentMethod a pointer
-	PaymentMethod *PaymentMethod `json:"payment_method"`
+	Id                uint    `json:"id"`
+	Name              string  `json:"name"`
+	PaymentMethod 		PaymentMethod  `json:"payment_method"`
+	Code              string  `json:"code,omitempty"`
+	IconUrl           string  `json:"icon_url,omitempty"`
+	OrderNum          int     `json:"order_num,omitempty"`
+	LibName           string  `json:"lib_name,omitempty"`
+	Mdr               string  `json:"mdr,omitempty"`
+	FixedFee          float64 `json:"fixed_fee,omitempty"`
+	CreatedAt        string  `json:"created_at"`
+	UpdatedAt        string  `json:"updated_at"`
 }
 
 type PaymentMethod struct {
-	Id   uint   `json:"id"`
-	Code string `json:"code"`
+	Id  uint   `json:"id"`
+	Name string `json:"name"`
 }
 
 type PaymentChannelFilter struct {

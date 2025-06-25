@@ -4,8 +4,23 @@ import (
 	"github.com/thoriqwildan/svdclone-be/pkg/database"
 )
 
+type PaymentChannelQueryResult struct {
+	Id                uint    `json:"id"`
+	Name              string  `json:"name"`
+	Code              string  `json:"code"`
+	IconUrl           string  `json:"icon_url"`
+	OrderNum          int     `json:"order_num"`
+	LibName           string  `json:"lib_name"`
+	Mdr               string  `json:"mdr"`
+	FixedFee          float64 `json:"fixed_fee"`
+	CreatedAt         string  `json:"created_at"`
+	UpdatedAt         string  `json:"updated_at"`
+	PaymentMethodId   uint    `json:"payment_method_id"`
+	PaymentMethodName string  `json:"payment_method_name"`
+}
+
 func GetFiltered(filter PaymentChannelFilter) ([]PaymentChannelResponse, int64, error) {
-	var paymentChannels []PaymentChannelResponse
+	var results []PaymentChannelQueryResult
 	var total int64
 
 	query := database.DB.
@@ -14,18 +29,19 @@ func GetFiltered(filter PaymentChannelFilter) ([]PaymentChannelResponse, int64, 
 			pc.id,
 			pc.name,
 			pc.code,
-			pc.icon_url,
-			pc.order_num,
-			pc.lib_name,
+			COALESCE(pc.icon_url, '') as icon_url,
+			COALESCE(pc.order_num, 0) as order_num,
+			COALESCE(pc.lib_name, '') as lib_name,
 			pc.mdr,
 			pc.fixed_fee,
-			pc.created_at,
-			pc.updated_at,
-			pm.code as payment_method__code,
-			pm.id as payment_method__id
-		`).Joins("LEFT JOIN payment_methods pm ON pm.id = pc.payment_method_id")
+			TO_CHAR(pc.created_at, 'YYYY-MM-DD HH24:MI:SS') as created_at,
+			TO_CHAR(pc.updated_at, 'YYYY-MM-DD HH24:MI:SS') as updated_at,
+			pc.payment_method_id,
+			COALESCE(pm.name, '') as payment_method_name
+		`).
+		Joins("LEFT JOIN payment_methods pm ON pm.id = pc.payment_method_id")
 
-	// Apply filters if provided
+	// Filter
 	if filter.Code != "" {
 		query = query.Where("pc.code ILIKE ?", "%"+filter.Code+"%")
 	}
@@ -33,12 +49,12 @@ func GetFiltered(filter PaymentChannelFilter) ([]PaymentChannelResponse, int64, 
 		query = query.Where("pc.name ILIKE ?", "%"+filter.Name+"%")
 	}
 
-	// Get total count before applying pagination
+	// Total count
 	if err := query.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
-	// Apply pagination
+	// Pagination
 	if filter.Page < 1 {
 		filter.Page = 1
 	}
@@ -47,14 +63,36 @@ func GetFiltered(filter PaymentChannelFilter) ([]PaymentChannelResponse, int64, 
 	}
 	offset := (filter.Page - 1) * filter.Limit
 
-	// Execute query and scan into paymentChannels slice
+	// Query data
 	if err := query.
 		Limit(filter.Limit).
 		Offset(offset).
 		Order("pc.id DESC").
-		Scan(&paymentChannels).Error; err != nil {
+		Scan(&results).Error; err != nil {
 		return nil, 0, err
 	}
 
-	return paymentChannels, total, nil
+	// Convert to response format
+	var responses []PaymentChannelResponse
+	for _, result := range results {
+		response := PaymentChannelResponse{
+			Id:   result.Id,
+			Name: result.Name,
+			Code: result.Code,
+			PaymentMethod: PaymentMethod{
+				Id:   result.PaymentMethodId,
+				Name: result.PaymentMethodName,
+			},
+			IconUrl:   result.IconUrl,
+			OrderNum:  result.OrderNum,
+			LibName:   result.LibName,
+			Mdr:       result.Mdr,
+			FixedFee:  result.FixedFee,
+			CreatedAt: result.CreatedAt,
+			UpdatedAt: result.UpdatedAt,
+		}
+		responses = append(responses, response)
+	}
+
+	return responses, total, nil
 }
