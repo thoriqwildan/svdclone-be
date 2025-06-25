@@ -67,7 +67,7 @@ func CreatePaymentChannel(c *fiber.Ctx) error {
 			Name: paymentChannel.Name,
 			PaymentMethod: PaymentMethod{
 				Id: paymentChannel.PaymentMethodId,
-				Name: paymentmethod.GetCodeById(int(paymentChannel.PaymentMethodId)),
+				Code: paymentmethod.GetCodeById(int(paymentChannel.PaymentMethodId)),
 			},
 			Code: paymentChannel.Code,
 			IconUrl: paymentChannel.IconUrl.String,
@@ -131,7 +131,7 @@ func GetPaymentChannelById(c *fiber.Ctx) error {
 			Name: paymentChannel.Name,
 			PaymentMethod: PaymentMethod{
 				Id: paymentChannel.PaymentMethodId,
-				Name: paymentmethod.GetCodeById(int(paymentChannel.PaymentMethodId)),
+				Code: paymentmethod.GetCodeById(int(paymentChannel.PaymentMethodId)),
 			},
 			Code: paymentChannel.Code,
 			IconUrl: paymentChannel.IconUrl.String,
@@ -209,7 +209,7 @@ func UpdatePaymentChannel(c *fiber.Ctx) error {
 			Name: paymentChannel.Name,
 			PaymentMethod: PaymentMethod{
 				Id: paymentChannel.PaymentMethodId,
-				Name: paymentmethod.GetCodeById(int(paymentChannel.PaymentMethodId)),
+				Code: paymentmethod.GetCodeById(int(paymentChannel.PaymentMethodId)),
 			},
 			Code: paymentChannel.Code,
 			IconUrl: paymentChannel.IconUrl.String,

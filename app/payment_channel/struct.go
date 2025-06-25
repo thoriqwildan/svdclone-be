@@ -28,7 +28,7 @@ type PaymentChannelResponse struct {
 
 type PaymentMethod struct {
 	Id  uint   `json:"id"`
-	Name string `json:"name"`
+	Code string `json:"code"`
 }
 
 type PaymentChannelFilter struct {

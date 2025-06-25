@@ -16,7 +16,7 @@ type PaymentChannelQueryResult struct {
 	CreatedAt         string  `json:"created_at"`
 	UpdatedAt         string  `json:"updated_at"`
 	PaymentMethodId   uint    `json:"payment_method_id"`
-	PaymentMethodName string  `json:"payment_method_name"`
+	PaymentMethodCode string  `json:"payment_method_code"`
 }
 
 func GetFiltered(filter PaymentChannelFilter) ([]PaymentChannelResponse, int64, error) {
@@ -37,7 +37,7 @@ func GetFiltered(filter PaymentChannelFilter) ([]PaymentChannelResponse, int64, 
 			TO_CHAR(pc.created_at, 'YYYY-MM-DD HH24:MI:SS') as created_at,
 			TO_CHAR(pc.updated_at, 'YYYY-MM-DD HH24:MI:SS') as updated_at,
 			pc.payment_method_id,
-			COALESCE(pm.name, '') as payment_method_name
+			COALESCE(pm.code, '') as payment_method_code
 		`).
 		Joins("LEFT JOIN payment_methods pm ON pm.id = pc.payment_method_id")
 
@@ -81,7 +81,7 @@ func GetFiltered(filter PaymentChannelFilter) ([]PaymentChannelResponse, int64, 
 			Code: result.Code,
 			PaymentMethod: PaymentMethod{
 				Id:   result.PaymentMethodId,
-				Name: result.PaymentMethodName,
+				Code: result.PaymentMethodCode,
 			},
 			IconUrl:   result.IconUrl,
 			OrderNum:  result.OrderNum,
