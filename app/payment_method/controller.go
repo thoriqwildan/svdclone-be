@@ -21,6 +21,13 @@ func CreatePaymentMethod(c *fiber.Ctx) error {
 		})
 	}
 
+	if err := database.DB.Where("name = ?", req.Name).First(&models.PaymentMethod{}).Error; err == nil {
+		return c.Status(fiber.StatusBadRequest).JSON(global.ErrorResponse{
+			Success: false,
+			Message: "Payment method with the same name already exists",
+			Errors:  nil,})
+	}
+
 	var paymentMethod models.PaymentMethod
 	paymentMethod.Name = req.Name
 	paymentMethod.Desc = helper.ToNullString(req.Desc)
@@ -128,13 +135,13 @@ func UpdatePaymentMethod(c *fiber.Ctx) error {
 		})
 	}
 
-	if err := database.DB.Where("name = ?", req.Name).First(&paymentMethod).Error; err == nil {
-		return c.Status(fiber.StatusBadRequest).JSON(global.ErrorResponse{
-			Success: false,
-			Message: "Payment method with the same name already exists",
-			Errors:  nil,
-		})
-	}
+	// if err := database.DB.Where("name = ?", req.Name).First(&paymentMethod).Error; err == nil {
+	// 	return c.Status(fiber.StatusBadRequest).JSON(global.ErrorResponse{
+	// 		Success: false,
+	// 		Message: "Payment method with the same name already exists",
+	// 		Errors:  nil,
+	// 	})
+	// }
 
 	paymentMethod.Name = req.Name
 	paymentMethod.Desc = helper.ToNullString(req.Desc)
