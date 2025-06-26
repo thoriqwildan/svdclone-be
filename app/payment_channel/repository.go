@@ -54,19 +54,9 @@ func GetFiltered(filter PaymentChannelFilter) ([]PaymentChannelResponse, int64, 
 		return nil, 0, err
 	}
 
-	// Pagination
-	if filter.Page < 1 {
-		filter.Page = 1
-	}
-	if filter.Limit < 1 {
-		filter.Limit = 10
-	}
-	offset := (filter.Page - 1) * filter.Limit
 
 	// Query data
 	if err := query.
-		Limit(filter.Limit).
-		Offset(offset).
 		Order("pc.id DESC").
 		Scan(&results).Error; err != nil {
 		return nil, 0, err

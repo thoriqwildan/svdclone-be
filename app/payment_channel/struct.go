@@ -34,6 +34,4 @@ type PaymentMethod struct {
 type PaymentChannelFilter struct {
 	Code string `query:"code"`
 	Name string `query:"name"`
-	Page int    `query:"page"`
-	Limit int    `query:"limit"`
 }

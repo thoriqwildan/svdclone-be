@@ -22,16 +22,9 @@ func GetFiltered(filter PaymentMethodFilter) ([]PaymentMethodResponse, int64, er
 		return nil, 0, err
 	}
 
-	if filter.Page < 1 {
-		filter.Page = 1
-	}
-	if filter.Limit < 1 {
-		filter.Limit = 10
-	}
 
-	offset := (filter.Page - 1) * filter.Limit
 
-	if err := query.Limit(filter.Limit).Offset(offset).Order("id DESC").Find(&paymentMethods).Error; err != nil {
+	if err := query.Order("id DESC").Find(&paymentMethods).Error; err != nil {
 		return nil, 0, err
 	}
 
