@@ -69,7 +69,7 @@ func GetPaymentMethods(c *fiber.Ctx) error {
 		})
 	}
 
-	data, _, err := GetFiltered(filter)
+	data, total, err := GetFiltered(filter)
 	if err != nil {
 		log.Error("Failed to get payment methods:", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(global.ErrorResponse{
@@ -82,7 +82,14 @@ func GetPaymentMethods(c *fiber.Ctx) error {
 	return c.JSON(global.SuccessResponse{
 		Success: true,
 		Message: "Payment methods retrieved successfully",
-		Data: data,
+		Data: global.PaginationData{
+			Items: data,
+			Meta: global.PaginationPage{
+				Page: filter.Page,
+				Limit: filter.Limit,
+				Total: total,
+			},
+		},
 	})
 }
 
