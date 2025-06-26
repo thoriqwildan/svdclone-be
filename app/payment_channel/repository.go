@@ -72,24 +72,37 @@ func GetFiltered(filter PaymentChannelFilter) ([]PaymentChannelResponse, int64, 
 		return nil, 0, err
 	}
 
-	// Convert to response format
-	var responses []PaymentChannelResponse
+	responses := make([]PaymentChannelResponse, 0, len(results))
+
+	if len(results) == 0 {
+		return responses, total, nil
+	}
+
 	for _, result := range results {
-		response := PaymentChannelResponse{
-			Id:   result.Id,
-			Name: result.Name,
-			Code: result.Code,
-			PaymentMethod: PaymentMethod{
+		var paymentMethod *PaymentMethod
+		if result.PaymentMethodId != 0 {
+			paymentMethod = &PaymentMethod{
 				Id:   result.PaymentMethodId,
 				Code: result.PaymentMethodCode,
-			},
-			IconUrl:   result.IconUrl,
-			OrderNum:  result.OrderNum,
-			LibName:   result.LibName,
-			Mdr:       result.Mdr,
-			FixedFee:  result.FixedFee,
-			CreatedAt: result.CreatedAt,
-			UpdatedAt: result.UpdatedAt,
+			}
+		}
+
+		var paymentMethodValue PaymentMethod
+		if paymentMethod != nil {
+			paymentMethodValue = *paymentMethod
+		}
+		response := PaymentChannelResponse{
+			Id:            result.Id,
+			Name:          result.Name,
+			Code:          result.Code,
+			PaymentMethod: paymentMethodValue,
+			IconUrl:       result.IconUrl,
+			OrderNum:      result.OrderNum,
+			LibName:       result.LibName,
+			Mdr:           result.Mdr,
+			FixedFee:      result.FixedFee,
+			CreatedAt:     result.CreatedAt,
+			UpdatedAt:     result.UpdatedAt,
 		}
 		responses = append(responses, response)
 	}
